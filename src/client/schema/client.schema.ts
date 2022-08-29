@@ -1,6 +1,18 @@
 import { SchemaFactory } from '@nestjs/mongoose';
 import { Client } from '../entities/client.entity';
 
+export const clientLoginSchemaApiBody = {
+  type: 'object',
+  properties: {
+    email: {
+      type: 'string',
+    },
+    password: {
+      type: 'string',
+    },
+  },
+};
+
 export const schemaApiBody = {
   type: 'object',
   properties: {

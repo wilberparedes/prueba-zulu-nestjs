@@ -7,14 +7,24 @@ import {
   Param,
   Post,
   Res,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ClientService } from '../client/client.service';
 import { UpserWalletDTO } from './dto/wallet.dto';
 import { Wallet } from './entities/wallet.entity';
 import { schemaWalletApiBody } from './schema/wallet.schema';
 import { WalletService } from './wallet.service';
 
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @ApiTags('Wallet Module')
 @Controller('wallet')
 export class WalletController {
@@ -33,6 +43,10 @@ export class WalletController {
   @ApiResponse({
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     description: 'Server problems',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'user dont have valid token',
   })
   async getWallets(@Res() res) {
     const wallets = await this.walletService.getWallets();
@@ -56,6 +70,10 @@ export class WalletController {
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     description: 'Format ID is not valid',
   })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'user dont have valid token',
+  })
   async getWalletByID(@Res() res, @Param('walletID') walletID: string) {
     const wallet = await this.walletService.getWalletByID(walletID);
     if (!wallet) throw new NotFoundException('Wallet does not exits');
@@ -78,6 +96,10 @@ export class WalletController {
   @ApiResponse({
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     description: 'Format ID is not valid',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'user dont have valid token',
   })
   async getWalletByUserID(@Res() res, @Param('userID') userID: string) {
     const wallet = await this.walletService.getWalletByUserID(userID);
@@ -103,6 +125,10 @@ export class WalletController {
   @ApiResponse({
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     description: 'Server problems',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'user dont have valid token',
   })
   @ApiBody({
     schema: schemaWalletApiBody,

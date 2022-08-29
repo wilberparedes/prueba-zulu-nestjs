@@ -1,19 +1,19 @@
 import {
-  Body,
   Controller,
   Get,
   HttpStatus,
   NotFoundException,
   Param,
-  Post,
   Res,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ClientService } from './client.service';
-import { UpsertClientDTO } from './dto/client.dto';
 import { Client } from './entities/client.entity';
-import { schemaApiBody } from './schema/client.schema';
 
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @ApiTags('Client Module')
 @Controller('client')
 export class ClientController {
@@ -29,6 +29,10 @@ export class ClientController {
   @ApiResponse({
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     description: 'Server problems',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'user dont have valid token',
   })
   async getClients(@Res() res) {
     const clients = await this.clientService.getClients();
@@ -46,35 +50,19 @@ export class ClientController {
   })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
-    description: 'Client not found',
+    description: 'Client does not exits',
   })
   @ApiResponse({
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     description: 'Format ID is not valid',
   })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'user dont have valid token',
+  })
   async getClient(@Res() res, @Param('clientID') clientID: string) {
     const client = await this.clientService.getClient(clientID);
     if (!client) throw new NotFoundException('Client does not exits');
-    return res.status(HttpStatus.OK).json({
-      client,
-    });
-  }
-
-  @Post('create')
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: `Create new client`,
-    type: Client,
-  })
-  @ApiResponse({
-    status: HttpStatus.INTERNAL_SERVER_ERROR,
-    description: 'Server problems',
-  })
-  @ApiBody({
-    schema: schemaApiBody,
-  })
-  async createClient(@Res() res, @Body() createClientDTO: UpsertClientDTO) {
-    const client = await this.clientService.createClient(createClientDTO);
     return res.status(HttpStatus.OK).json({
       client,
     });
