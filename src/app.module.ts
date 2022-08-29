@@ -9,7 +9,7 @@ import { AuthModule } from './auth/auth.module';
 @Module({
   imports: [
     ClientModule,
-    MongooseModule.forRoot('mongodb://localhost/prueba-zulu-nestjs'),
+    MongooseModule.forRoot(process.env.MONGODB_URI),
     WalletModule,
     AuthModule,
   ],
